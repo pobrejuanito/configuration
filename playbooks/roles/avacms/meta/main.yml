@@ -1,0 +1,25 @@
+---
+#
+# edX Configuration
+#
+# github:     https://github.com/edx/configuration
+# wiki:       https://openedx.atlassian.net/wiki/display/OpenOPS
+# code style: https://openedx.atlassian.net/wiki/display/OpenOPS/Ansible+Code+Conventions
+# license:    https://github.com/edx/configuration/blob/master/LICENSE.TXT
+#
+##
+# Role includes for role avacms
+#
+dependencies:
+  - common
+  - supervisor
+  - role: edx_service
+    edx_service_name: "{{ avacms_service_name }}"
+    edx_service_config: "{{ AVACMS_SERVICE_CONFIG }}"
+    edx_service_repos: "{{ AVACMS_REPOS }}"
+    edx_service_user: "{{ avacms_user }}"
+    edx_service_home: "{{ avacms_home }}"
+    edx_service_packages:
+      debian: "{{ avacms_debian_pkgs }}"
+      redhat: "{{ avacms_redhat_pkgs }}"
+  - oraclejdk

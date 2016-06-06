@@ -5,7 +5,10 @@ upstream xqueue_app_server {
 }
 
 server {
-  listen {{ XQUEUE_NGINX_PORT }} default_server;
+  listen {{ XQUEUE_NGINX_PORT }} ssl default_server;
+
+  ssl_certificate /etc/ssl/certs/{{ NGINX_SSL_CERTIFICATE|basename }};
+  ssl_certificate_key /etc/ssl/private/{{ NGINX_SSL_KEY|basename }};
 
   location / {
     {% if XQUEUE_ENABLE_BASIC_AUTH|bool %}

@@ -1,0 +1,166 @@
+---
+#
+# edX Configuration
+#
+# github:     https://github.com/edx/configuration
+# wiki:       https://openedx.atlassian.net/wiki/display/OpenOPS
+# code style: https://openedx.atlassian.net/wiki/display/OpenOPS/Ansible+Code+Conventions
+# license:    https://github.com/edx/configuration/blob/master/LICENSE.TXT
+#
+#
+#
+# Tasks for role avacms
+#
+# Overview:
+#
+#
+# Dependencies:
+#
+#
+# Example play:
+#
+#
+- name: "add gunicorn configuration file"
+  template: >
+    src=edx/app/avacms/avacms_gunicorn.py.j2
+    dest={{ avacms_home }}/avacms_gunicorn.py
+  sudo_user: "{{ avacms_user }}"
+
+- name: install application requirements
+  pip: >
+    requirements="{{ avacms_requirements_base }}/{{ item }}"
+    virtualenv="{{ avacms_venv_dir }}"
+    state=present
+  sudo_user: "{{ avacms_user }}"
+  with_items: avacms_requirements
+
+- name: create nodeenv
+  shell: >
+    creates={{ avacms_nodeenv_dir }}
+    {{ avacms_venv_dir }}/bin/nodeenv {{ avacms_nodeenv_dir }} --prebuilt
+  sudo_user: "{{ avacms_user }}"
+
+- name: install node dependencies
+  npm: executable={{ avacms_nodeenv_bin }}/npm path={{ avacms_code_dir }} production=yes
+  sudo_user: "{{ avacms_user }}"
+  environment: "{{ avacms_environment }}"
+
+- name: install bower dependencies
+  shell: >
+    chdir={{ avacms_code_dir }}
+    . {{ avacms_nodeenv_bin }}/activate && {{ avacms_node_bin }}/bower install --production --config.interactive=false
+  sudo_user: "{{ avacms_user }}"
+
+- name: migrate
+  shell: >
+    chdir={{ avacms_code_dir }}
+    DB_MIGRATION_USER='{{ COMMON_MYSQL_MIGRATE_USER }}'
+    DB_MIGRATION_PASS='{{ COMMON_MYSQL_MIGRATE_PASS }}'
+    {{ avacms_venv_dir }}/bin/python ./manage.py migrate --noinput
+  sudo_user: "{{ avacms_user }}"
+  environment: "{{ avacms_environment }}"
+  when: migrate_db is defined and migrate_db|lower == "yes"
+
+- name: populate countries
+  shell: >
+    chdir={{ avacms_code_dir }}
+    DB_MIGRATION_USER={{ COMMON_MYSQL_MIGRATE_USER }}
+    DB_MIGRATION_PASS={{ COMMON_MYSQL_MIGRATE_PASS }}
+    {{ avacms_venv_dir }}/bin/python ./manage.py oscar_populate_countries
+  sudo_user: "{{ avacms_user }}"
+  environment: "{{ avacms_environment }}"
+  when: migrate_db is defined and migrate_db|lower == "yes"
+  # the `register` and `failed_when` directives below are here to emulate idempotency for this oscar command.
+  # if and when https://github.com/django-oscar/django-oscar/pull/1841 is merged, the directives can be removed
+  # in favor of the (proposed) --initial-only command option.
+  register: command_result
+  failed_when:
+    - "'You already have countries in your database' not in command_result.stderr"
+    - "command_result.rc != 0"
+
+- name: compile sass
+  shell: >
+    chdir={{ avacms_code_dir }}
+    {{ avacms_venv_dir }}/bin/python manage.py {{ item }}
+  sudo_user: "{{ avacms_user }}"
+  environment: "{{ avacms_environment }}"
+  with_items:
+    - "update_assets --skip-collect"
+  when: not devstack
+
+- name: run r.js optimizer
+  shell: >
+    chdir={{ avacms_code_dir }}
+    . {{ avacms_nodeenv_bin }}/activate && {{ avacms_node_bin }}/r.js -o build.js
+  sudo_user: "{{ avacms_user }}"
+  when: not devstack
+
+- name: run collectstatic
+  shell: >
+    chdir={{ avacms_code_dir }}
+    {{ avacms_venv_dir }}/bin/python manage.py {{ item }}
+  sudo_user: "{{ avacms_user }}"
+  environment: "{{ avacms_environment }}"
+  with_items:
+    - "collectstatic --noinput"
+    - "compress"
+  when: not devstack
+
+- name: write out the supervisor wrapper
+  template: >
+    src=edx/app/avacms/avacms.sh.j2
+    dest={{ avacms_home }}/{{ avacms_service_name }}.sh
+    mode=0650 owner={{ supervisor_user }} group={{ common_web_user }}
+
+- name: write supervisord config
+  template: >
+    src=edx/app/supervisor/conf.d.available/avacms.conf.j2
+    dest="{{ supervisor_available_dir }}/{{ avacms_service_name }}.conf"
+    owner={{ supervisor_user }} group={{ common_web_user }} mode=0644
+
+- name: setup the avacms env file
+  template: >
+    src="./{{ avacms_home }}/{{ avacms_service_name }}_env.j2"
+    dest="{{ avacms_home }}/avacms_env"
+    owner={{ avacms_user }}
+    group={{ avacms_user }}
+    mode=0644
+
+- name: enable supervisor script
+  file: >
+    src={{ supervisor_available_dir }}/{{ avacms_service_name }}.conf
+    dest={{ supervisor_cfg_dir }}/{{ avacms_service_name }}.conf
+    state=link
+    force=yes
+  when: not disable_edx_services
+
+- name: update supervisor configuration
+  shell: "{{ supervisor_ctl }} -c {{ supervisor_cfg }} update"
+  when: not disable_edx_services
+
+- name: create symlinks from the-er venv bin dir
+  file: >
+    src="{{ avacms_venv_dir }}/bin/{{ item }}"
+    dest="{{ COMMON_BIN_DIR }}/{{ item.split('.')[0] }}.avacms"
+    state=link
+  with_items:
+  - python
+  - pip
+  - django-admin.py
+
+- name: create symlinks from the repo dir
+  file: >
+    src="{{ avacms_code_dir }}/{{ item }}"
+    dest="{{ COMMON_BIN_DIR }}/{{ item.split('.')[0] }}.avacms"
+    state=link
+  with_items:
+  - manage.py
+
+- name: restart the applicaton
+  supervisorctl: >
+    state=restarted
+    supervisorctl_path={{ supervisor_ctl }}
+    config={{ supervisor_cfg }}
+    name={{ avacms_service_name }}
+  when: not disable_edx_services
+  sudo_user: "{{ supervisor_service_user }}"

@@ -1,0 +1,12 @@
+"""
+gunicorn configuration file: http://docs.gunicorn.org/en/develop/configure.html
+{{ ansible_managed }}
+"""
+
+timeout = {{ avacms_gunicorn_timeout }}
+bind = "{{ avacms_gunicorn_host }}:{{ avacms_gunicorn_port }}"
+pythonpath = "{{ avacms_code_dir }}"
+#workers = {{ AVACMS_GUNICORN_WORKERS }}
+#worker_class = "{{ AVACMS_GUNICORN_WORKER_CLASS }}"
+
+{{ AVACMS_GUNICORN_EXTRA_CONF }}

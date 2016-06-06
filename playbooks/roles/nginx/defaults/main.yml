@@ -84,6 +84,7 @@ CMS_HOSTNAME: '~^((stage|prod)-)?studio.*'
 ECOMMERCE_HOSTNAME: '~^((stage|prod)-)?ecommerce.*'
 PROGRAMS_HOSTNAME: '~^((stage|prod)-)?programs.*'
 CREDENTIALS_HOSTNAME: '~^((stage|prod)-)?credentials.*'
+AVACMS_HOSTNAME: '~^((stage|prod)-)?cms.*'
 
 nginx_template_dir: "edx/app/nginx/sites-available"
 
@@ -112,6 +113,8 @@ nginx_ecommerce_gunicorn_hosts:
 nginx_programs_gunicorn_hosts:
   - 127.0.0.1
 nginx_credentails_gunicorn_hosts:
+  - 127.0.0.1
+nginx_avacms_gunicorn_hosts:
   - 127.0.0.1
 
 nginx_cfg:
@@ -151,5 +154,6 @@ NGINX_CREATE_HTPASSWD_FILE: >
     KIBANA_ENABLE_BASIC_AUTH|bool or
     PROGRAMS_ENABLE_BASIC_AUTH|bool or
     XQUEUE_ENABLE_BASIC_AUTH|bool or
-    XSERVER_ENABLE_BASIC_AUTH|bool
+    XSERVER_ENABLE_BASIC_AUTH|bool or
+    AVACMS_ENABLE_BASIC_AUTH|bool
   }}
