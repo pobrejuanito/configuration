@@ -9,17 +9,12 @@
 #
 ##
 # Role includes for role avacms
+# 
+# Example:
 #
-dependencies:
-  - common
-  - supervisor
-  - role: edx_service
-    edx_service_name: "{{ avacms_service_name }}"
-    edx_service_config: "{{ AVACMS_SERVICE_CONFIG }}"
-    edx_service_repos: "{{ AVACMS_REPOS }}"
-    edx_service_user: "{{ avacms_user }}"
-    edx_service_home: "{{ avacms_home }}"
-    edx_service_packages:
-      debian: "{{ avacms_debian_pkgs }}"
-      redhat: "{{ avacms_redhat_pkgs }}"
-  - oraclejdk
+# dependencies:
+#   - {
+#   role: my_role 
+#   my_role_var0: "foo"
+#   my_role_var1: "bar"
+# }
