@@ -42,6 +42,7 @@ avacms_code_dir: "{{ avacms_home }}/{{ avacms_service_name }}"
 avacms_venv_dir: "{{ avacms_home }}/venvs/{{ avacms_service_name }}"
 
 avacms_data_dir: "{{ COMMON_DATA_DIR }}/{{ avacms_service_name }}"
+avacms_app_dir: "{{ COMMON_APP_DIR }}/edxapp"
 
 avacms_gunicorn_host: "127.0.0.1"
 avacms_gunicorn_port: "8090"

@@ -1,0 +1,18 @@
+- name: Configure instance(s)
+  hosts: all
+  sudo: True
+  gather_facts: True
+  vars:
+    migrate_db: 'yes'
+    openid_workaround: true
+    devstack: true
+    disable_edx_services: true
+    COMMON_MOTD_TEMPLATE: 'devstack_motd.tail.j2'
+    COMMON_SSH_PASSWORD_AUTH: "yes"
+  roles:
+    - common
+    - vhost
+    #- edx_ansible
+    #- mysql
+    #- edxlocal
+    - avacms

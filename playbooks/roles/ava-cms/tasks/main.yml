@@ -35,7 +35,7 @@
 
 - name: "add gunicorn configuration file"
   template: >
-    src=edx/app/ava-cms/avacms_gunicorn.py.j2
+    src=edx/app/avacms/avacms_gunicorn.py.j2
     dest={{ avacms_home }}/avacms_gunicorn.py
   sudo_user: "{{ avacms_user }}"
 
