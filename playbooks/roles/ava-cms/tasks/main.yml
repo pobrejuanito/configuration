@@ -1,34 +1,34 @@
 ---
-#
-# edX Configuration
-#
-# github:     https://github.com/edx/configuration
-# wiki:       https://openedx.atlassian.net/wiki/display/OpenOPS
-# code style: https://openedx.atlassian.net/wiki/display/OpenOPS/Ansible+Code+Conventions
-# license:    https://github.com/edx/configuration/blob/master/LICENSE.TXT
-#
-#
-#
-# Tasks for role avacms
-#
-# Overview:
-#
-#
-# Dependencies:
-#
-#
-# Example play:
-#
-#
-
-- name: stub ansible task
-  debug: msg="This is a stub task created by the ansible-role role"
-  notify: notify me
 
 - name: create application user
   user: >
-    name="{{ avacms_user }}" home="{{ avacms_home }}"
-    createhome=no shell=/bin/false
+    name="{{ avacms_user }}"
+    home="{{ avacms_home }}"
+    createhome=yes
+    shell=/bin/false
+    generate_ssh_key=yes
+  tags:
+    - install
+    - install:base
+
+# Ensure the directory is accessible to the web service
+- name: set avacms app dir permissions
+  file: >
+    path="{{ avacms_home }}"
+    state=directory
+    owner="{{ avacms_user }}"
+    group="{{ common_web_group }}"
+  tags:
+    - install
+    - install:base
+
+- name: setup the avacms env
+  template: >
+    src=edx/app/avacms/avacms_env.j2
+    dest={{ avacms_home }}/avacms_env
+    owner={{ avacms_user }}
+    group={{ common_web_user }}
+    mode=0644
   tags:
     - install
     - install:base
@@ -39,23 +39,45 @@
     dest={{ avacms_home }}/avacms_gunicorn.py
   sudo_user: "{{ avacms_user }}"
 
-#- name: checkout ava-cms repo into {{ avacms_code_dir }}
-#  git_2_0_1: >
-#    dest={{ avacms_code_dir }}
-#    repo={{ avacms_platform_repo }}
-#    version={{ ava_platform_version }}
-#    accept_hostkey=yes
-#  sudo_user: "{{ avacms_user }}"
-#  environment:
-#    GIT_SSH: "{{ avacms_git_ssh }}"
-#  register: avacms_platform_checkout
-#  tags:
-#    - install
-#    - install:code
 
-#- name: git clean after checking out ava-cms
-#  shell: cd {{ avacms_code_dir }} && git clean -xdf
-#  sudo_user: "{{ avacms_user }}"
-#  tags:
-#    - install
-#    - install:code
+- name: checkout ava-cms repo into {{ avacms_code_dir }}
+  git_2_0_1: >
+    dest={{ avacms_code_dir }}
+    repo={{ AVACMS_REPO }}
+    version={{ AVACMS_VERSION }}
+    accept_hostkey=yes
+  sudo_user: "{{ avacms_user }}"
+  environment:
+    GIT_SSH: "{{ avacms_git_ssh }}"
+  register: avacms_platform_checkout
+  tags:
+    - install
+    - install:code
+
+- name: install application requirements
+  pip: >
+    requirements="{{ avacms_requirements_base }}/{{ item }}"
+    virtualenv="{{ avacms_venv_dir }}"
+    state=present
+  sudo_user: "{{ avacms_user }}"
+  with_items: avacms_requirements
+
+- name: migrate
+  shell: >
+    chdir={{ avacms_code_dir }}
+    DB_MIGRATION_USER='{{ AVCMS_DB_USER }}'
+    DB_MIGRATION_PASS='{{ AVCMS_DB_PASS }}'
+    {{ avacms_venv_dir }}/bin/python ./manage.py migrate --noinput
+  sudo_user: "{{ avacms_user }}"
+  environment: "{{ avacms_environment }}"
+  when: migrate_db is defined and migrate_db|lower == "yes"
+
+- name: run collectstatic
+  shell: >
+    chdir={{ avacms_code_dir }}
+    {{ avacms_venv_dir }}/bin/python manage.py {{ item }}
+  sudo_user: "{{ avacms_user }}"
+  environment: "{{ avacms_environment }}"
+  with_items:
+    - "collectstatic --noinput"
+  when: not devstack

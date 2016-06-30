@@ -11,8 +11,8 @@
     COMMON_SSH_PASSWORD_AUTH: "yes"
   roles:
     - common
-    - vhost
+    #- vhost
     #- edx_ansible
     #- mysql
     #- edxlocal
-    - avacms
+    - ava-cms

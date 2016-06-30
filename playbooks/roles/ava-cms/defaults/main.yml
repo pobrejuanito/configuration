@@ -1,39 +1,37 @@
 ---
 #
-# edX Configuration
+# avacms Configuration
 #
-# github:     https://github.com/edx/configuration
-# wiki:       https://openedx.atlassian.net/wiki/display/OpenOPS
-# code style: https://openedx.atlassian.net/wiki/display/OpenOPS/Ansible+Code+Conventions
-# license:    https://github.com/edx/configuration/blob/master/LICENSE.TXT
 #
 ##
 # Defaults for role avacms
 #
 AVACMS_GIT_IDENTITY: !!null
 
-AVACMS_DJANGO_SETTINGS_MODULE: "avacms.settings.production"
+AVACMS_REPO: https://xp-dev.com/git/ava-cms
+AVACMS_DJANGO_SETTINGS_MODULE: "ava_cms.production"
 AVACMS_VERSION: "master"
 
-AVACMS_REPOS:
-  - PROTOCOL: "{{ COMMON_GIT_PROTOCOL }}"
-    DOMAIN: "{{ COMMON_GIT_MIRROR }}"
-    PATH: "{{ COMMON_GIT_PATH }}"
-    REPO: avacms.git
-    VERSION: "{{ AVACMS_VERSION }}"
-    DESTINATION: "{{ avacms_code_dir }}"
-    SSH_KEY: "{{ AVACMS_GIT_IDENTITY }}"
+AVACMS_DEFAULT_DB_NAME: 'avacms'
+AVACMS_HOST: 'localhost'
+AVCMS_DB_USER: 'avacms'
+AVCMS_DB_PASS: 'password'
+
+AVACMS_DATABASES:
+  default:
+    ENGINE: 'django.db.backends.mysql'
+    NAME: '{{ AVACMS_DEFAULT_DB_NAME }}'
+    USER: '{{ AVCMS_DB_USER }}'
+    PASSWORD: '{{ AVCMS_DB_PASS }}'
+    HOST: '{{ AVACMS_HOST }}'
+    PORT: '3306'
+    ATOMIC_REQUESTS: true
+    CONN_MAX_AGE: 60
 
 AVACMS_GUNICORN_WORKERS: "2"
 AVACMS_GUNICORN_EXTRA: ""
 AVACMS_GUNICORN_EXTRA_CONF: ""
 AVACMS_GUNICORN_WORKER_CLASS: "gevent"
-
-#
-# vars are namespaced with the module name.
-#
-ava_platform_repo: "ssh://xp-dev.com/ava-cms"
-ava_platform_version: "master"
 
 avacms_service_name: "avacms"
 avacms_user: "{{ avacms_service_name }}"
@@ -42,7 +40,7 @@ avacms_code_dir: "{{ avacms_home }}/{{ avacms_service_name }}"
 avacms_venv_dir: "{{ avacms_home }}/venvs/{{ avacms_service_name }}"
 
 avacms_data_dir: "{{ COMMON_DATA_DIR }}/{{ avacms_service_name }}"
-avacms_app_dir: "{{ COMMON_APP_DIR }}/edxapp"
+avacms_app_dir: "{{ COMMON_APP_DIR }}/avacms"
 
 avacms_gunicorn_host: "127.0.0.1"
 avacms_gunicorn_port: "8090"
@@ -62,6 +60,20 @@ avacms_environment:
   AVACMS_CFG: "{{ COMMON_CFG_DIR }}/{{ avacms_service_name }}.yml"
   PATH: "{{ avacms_venv_dir }}/bin:{{ ansible_env.PATH }}"
 
+AVACMS_REPOS:
+  - PROTOCOL: "{{ COMMON_GIT_PROTOCOL }}"
+    DOMAIN: "{{ COMMON_GIT_MIRROR }}"
+    PATH: "{{ COMMON_GIT_PATH }}"
+    REPO: ava-cms
+    VERSION: "{{ AVACMS_VERSION }}"
+    DESTINATION: "{{ avacms_code_dir }}"
+    SSH_KEY: "{{ AVACMS_GIT_IDENTITY }}"
+
+AVACMS_SERVICE_CONFIG:
+  DATABASE_OPTIONS:
+    connect_timeout: 10
+  DATABASES: '{{ AVACMS_DATABASES }}'
+  STATIC_ROOT: "{{ COMMON_DATA_DIR }}/{{ avacms_service_name }}/staticfiles"
 #
 # OS packages
 #
