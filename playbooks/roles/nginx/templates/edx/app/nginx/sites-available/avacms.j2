@@ -1,3 +1,7 @@
+#
+# {{ ansible_managed }}
+#
+
 upstream ava-backend {
     {% for host in nginx_avacms_gunicorn_hosts %}
         server {{ host }}:{{ avacms_gunicorn_port }} fail_timeout=0;
@@ -5,8 +9,8 @@ upstream ava-backend {
 }
 
 server {
-  # AVACMS configuration file for nginx, templated by ansible
 
+  # AVACMS configuration file for nginx, templated by ansible
   server_name {{ AVACMS_HOSTNAME }};
   listen 80 default;
   listen 443 ssl;
@@ -20,20 +24,19 @@ server {
   # there is an unfortunate mix of conditonals here.
   {% if NGINX_REDIRECT_TO_HTTPS %}
      {% if NGINX_HTTPS_REDIRECT_STRATEGY == "scheme" %}
-      # Redirect http to https over single instance
-      if ($scheme != "https")
-      {
-       set $do_redirect_to_https "true";
-      }
-  {% elif NGINX_HTTPS_REDIRECT_STRATEGY == "forward_for_proto" %}
+  # Redirect http to https over single instance
+  if ($scheme != "https")
+  {
+    set $do_redirect_to_https "true";
+  }
+    {% elif NGINX_HTTPS_REDIRECT_STRATEGY == "forward_for_proto" %}
 
-      # Forward to HTTPS if we're an HTTP request... and the server is behind ELB
-      if ($http_x_forwarded_proto = "http")
-      {
-       set $do_redirect_to_https "true";
-      }
+  # Forward to HTTPS if we're an HTTP request... and the server is behind ELB
+  if ($http_x_forwarded_proto = "http")
+  {
+   set $do_redirect_to_https "true";
+  }
   {% endif %}
-
   # Execute the actual redirect
   if ($do_redirect_to_https = "true")
   {
@@ -50,8 +53,6 @@ server {
   error_log {{ nginx_log_dir }}/error.log error;
 
   client_max_body_size 4M;
-
-  rewrite ^(.*)/favicon.ico$ /static/images/favicon.ico last;
 
   location @proxy_to_avacms_app {
     {% if NGINX_SET_X_FORWARDED_HEADERS %}
