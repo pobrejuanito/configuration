@@ -12,26 +12,23 @@ AVACMS_REPO: https://xp-dev.com/git/ava-cms
 AVACMS_DJANGO_SETTINGS_MODULE: "ava_cms.production"
 AVACMS_VERSION: "master"
 
-AVACMS_DEFAULT_DB_NAME: 'avacms'
-AVACMS_HOST: 'localhost'
-AVCMS_DB_USER: 'avacms'
-AVCMS_DB_PASS: 'password'
+AVACMS_HOSTNAME: 'cms.avadvance.org'
+# Database
+AVACMS_DB_NAME: 'avacms'
+AVACMS_DB_HOST: 'localhost'
+AVACMS_DB_USER: 'avacms'
+AVACMS_DB_PASS: 'password'
 
 AVACMS_DATABASES:
   default:
     ENGINE: 'django.db.backends.mysql'
-    NAME: '{{ AVACMS_DEFAULT_DB_NAME }}'
-    USER: '{{ AVCMS_DB_USER }}'
-    PASSWORD: '{{ AVCMS_DB_PASS }}'
-    HOST: '{{ AVACMS_HOST }}'
+    NAME: '{{ AVACMS_DB_NAME }}'
+    USER: '{{ AVACMS_DB_USER }}'
+    PASSWORD: '{{ AVACMS_DB_PASS }}'
+    HOST: '{{ AVACMS_DB_HOST }}'
     PORT: '3306'
     ATOMIC_REQUESTS: true
     CONN_MAX_AGE: 60
-
-AVACMS_GUNICORN_WORKERS: "2"
-AVACMS_GUNICORN_EXTRA: ""
-AVACMS_GUNICORN_EXTRA_CONF: ""
-AVACMS_GUNICORN_WORKER_CLASS: "gevent"
 
 avacms_service_name: "avacms"
 avacms_user: "{{ avacms_service_name }}"
@@ -54,6 +51,9 @@ avacms_requirements:
   - optional.txt
 
 avacms_role_name: avacms
+
+#Number of gunicorn worker processes to spawn, as a multiplier to number of virtual cores
+avacms_worker_core_mult: 4
 
 avacms_environment:
   DJANGO_SETTINGS_MODULE: "{{ AVACMS_DJANGO_SETTINGS_MODULE }}"
@@ -79,5 +79,4 @@ AVACMS_SERVICE_CONFIG:
 #
 
 avacms_debian_pkgs: []
-
 avacms_redhat_pkgs: []

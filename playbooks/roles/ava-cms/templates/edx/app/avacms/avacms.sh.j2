@@ -4,7 +4,6 @@
 
 {% set avacms_venv_bin = avacms_home + "/venvs/" + avacms_service_name + "/bin" %}
 {% set executable = avacms_venv_bin + '/gunicorn' %}
-{% endif %}
 
 source {{ avacms_home }}/avacms_env
-{{ executable }} -c {{ avacms_home }}/avacms_gunicorn.py {{ AVACMS_GUNICORN_EXTRA }} avacms.wsgi:application
+{{ executable }} -c {{ avacms_home }}/avacms_gunicorn.py ava_cms.wsgi:application

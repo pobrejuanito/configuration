@@ -39,7 +39,6 @@
     dest={{ avacms_home }}/avacms_gunicorn.py
   sudo_user: "{{ avacms_user }}"
 
-
 - name: checkout ava-cms repo into {{ avacms_code_dir }}
   git_2_0_1: >
     dest={{ avacms_code_dir }}
@@ -65,8 +64,8 @@
 - name: migrate
   shell: >
     chdir={{ avacms_code_dir }}
-    DB_MIGRATION_USER='{{ AVCMS_DB_USER }}'
-    DB_MIGRATION_PASS='{{ AVCMS_DB_PASS }}'
+    DB_MIGRATION_USER='{{ AVACMS_DB_USER }}'
+    DB_MIGRATION_PASS='{{ AVACMS_DB_PASS }}'
     {{ avacms_venv_dir }}/bin/python ./manage.py migrate --noinput
   sudo_user: "{{ avacms_user }}"
   environment: "{{ avacms_environment }}"
@@ -81,3 +80,45 @@
   with_items:
     - "collectstatic --noinput"
   when: not devstack
+
+- name: write out the supervisor wrapper
+  template: >
+    src=edx/app/avacms/avacms.sh.j2
+    dest={{ avacms_home }}/{{ avacms_service_name }}.sh
+    mode=0650 owner={{ supervisor_user }} group={{ common_web_user }}
+
+- name: write supervisord config
+  template: >
+    src=edx/app/supervisor/conf.d.available/avacms.conf.j2
+    dest="{{ supervisor_available_dir }}/{{ avacms_service_name }}.conf"
+    owner={{ supervisor_user }} group={{ common_web_user }} mode=0644
+
+- name: enable supervisor script
+  file: >
+    src={{ supervisor_available_dir }}/{{ avacms_service_name }}.conf
+    dest={{ supervisor_cfg_dir }}/{{ avacms_service_name }}.conf
+    state=link
+    force=yes
+  when: not disable_edx_services
+
+- name: create symlinks from the-er venv bin dir
+  file: >
+    src="{{ avacms_venv_dir }}/bin/{{ item }}"
+    dest="{{ COMMON_BIN_DIR }}/{{ item.split('.')[0] }}.avacms"
+    state=link
+  with_items:
+  - python
+  - pip
+  - django-admin.py
+
+- name: create symlinks from the repo dir
+  file: >
+    src="{{ avacms_code_dir }}/{{ item }}"
+    dest="{{ COMMON_BIN_DIR }}/{{ item.split('.')[0] }}.avacms"
+    state=link
+  with_items:
+  - manage.py
+
+- name: update supervisor configuration
+  shell: "{{ supervisor_ctl }} -c {{ supervisor_cfg }} update"
+  when: not disable_edx_services
