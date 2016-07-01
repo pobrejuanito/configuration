@@ -12,8 +12,8 @@ server {
 
   # AVACMS configuration file for nginx, templated by ansible
   server_name {{ AVACMS_HOSTNAME }};
-  listen 80 default;
-  listen 443 ssl;
+  listen 80;
+  listen 443;
 
   ssl_certificate /etc/ssl/certs/{{ NGINX_SSL_CERTIFICATE|basename }};
   ssl_certificate_key /etc/ssl/private/{{ NGINX_SSL_KEY|basename }};
