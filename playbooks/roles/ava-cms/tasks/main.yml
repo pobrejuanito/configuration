@@ -53,6 +53,17 @@
     - install
     - install:code
 
+# setup media directory and make it accessible to web
+- name: set app media dir permissions
+  file: >
+    path="{{ avacms_code_dir }}/media"
+    state=directory
+    owner="{{ avacms_user }}"
+    group="{{ common_web_group }}"
+  tags:
+    - install
+    - install:base
+
 - name: install application requirements
   pip: >
     requirements="{{ avacms_requirements_base }}/{{ item }}"
