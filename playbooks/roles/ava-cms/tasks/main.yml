@@ -60,7 +60,7 @@
     state=directory
     owner="{{ avacms_user }}"
     group="{{ common_web_group }}"
-    mode=0774
+    mode=0775
   tags:
     - install
     - install:base
