@@ -9,7 +9,7 @@
 AVACMS_GIT_IDENTITY: !!null
 
 AVACMS_REPO: https://xp-dev.com/git/ava-cms
-AVACMS_DJANGO_SETTINGS_MODULE: "ava_cms.production"
+AVACMS_DJANGO_SETTINGS_MODULE: "ava_cms.settings.production"
 AVACMS_VERSION: "master"
 
 AVACMS_HOSTNAME: 'cms.avadvance.org'

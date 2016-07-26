@@ -61,9 +61,7 @@
     owner="{{ avacms_user }}"
     group="{{ common_web_group }}"
     mode=0775
-  tags:
-    - install
-    - install:base
+  when: not devstack
 
 - name: install application requirements
   pip: >
