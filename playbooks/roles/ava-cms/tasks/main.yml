@@ -79,7 +79,7 @@
     {{ avacms_venv_dir }}/bin/python ./manage.py migrate --noinput
   sudo_user: "{{ avacms_user }}"
   environment: "{{ avacms_environment }}"
-  when: migrate_db is defined and migrate_db|lower == "yes"
+  when: not devstack and migrate_db is defined and migrate_db|lower == "yes"
 
 - name: run collectstatic
   shell: >
@@ -111,7 +111,7 @@
     force=yes
   when: not disable_edx_services
 
-- name: create symlinks from the-er venv bin dir
+- name: create symlinks from the rvenv bin dir
   file: >
     src="{{ avacms_venv_dir }}/bin/{{ item }}"
     dest="{{ COMMON_BIN_DIR }}/{{ item.split('.')[0] }}.avacms"
