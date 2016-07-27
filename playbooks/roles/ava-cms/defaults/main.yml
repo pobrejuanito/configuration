@@ -74,6 +74,7 @@ AVACMS_SERVICE_CONFIG:
     connect_timeout: 10
   DATABASES: '{{ AVACMS_DATABASES }}'
   STATIC_ROOT: "{{ COMMON_DATA_DIR }}/{{ avacms_service_name }}/staticfiles"
+  MEDIA_ROOT: '{{ avacms_code_dir }}/media'
 #
 # OS packages
 #
