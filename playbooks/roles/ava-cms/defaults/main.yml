@@ -38,6 +38,7 @@ avacms_venv_dir: "{{ avacms_home }}/venvs/{{ avacms_service_name }}"
 
 avacms_data_dir: "{{ COMMON_DATA_DIR }}/{{ avacms_service_name }}"
 avacms_app_dir: "{{ COMMON_APP_DIR }}/avacms"
+avacms_media_dir: "{{ avacms_code_dir }}/media"
 
 avacms_gunicorn_host: "127.0.0.1"
 avacms_gunicorn_port: "8090"
@@ -74,7 +75,7 @@ AVACMS_SERVICE_CONFIG:
     connect_timeout: 10
   DATABASES: '{{ AVACMS_DATABASES }}'
   STATIC_ROOT: "{{ COMMON_DATA_DIR }}/{{ avacms_service_name }}/staticfiles"
-  MEDIA_ROOT: '{{ avacms_code_dir }}/media'
+  MEDIA_ROOT: '{{ avacms_media_dir }}'
 #
 # OS packages
 #
