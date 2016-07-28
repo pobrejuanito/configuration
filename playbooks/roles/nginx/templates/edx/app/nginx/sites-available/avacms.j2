@@ -50,7 +50,7 @@ server {
   }
 
   location ~ ^/media/(?P<file>.*) {
-    root {{ avacms_media_dir }};
+    root {{ avacms_code_dir }};
     try_files /media/$file =404;
   }
 
