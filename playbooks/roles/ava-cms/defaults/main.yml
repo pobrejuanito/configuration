@@ -19,6 +19,9 @@ AVACMS_DB_HOST: 'localhost'
 AVACMS_DB_USER: 'avacms'
 AVACMS_DB_PASS: 'password'
 
+AVACMS_DEFAULT_FROM_EMAIL: 'no-reply@avadvance.org'
+AVACMS_SERVER_EMAIL: 'support@avadvance.org'
+
 AVACMS_DATABASES:
   default:
     ENGINE: 'django.db.backends.mysql'
@@ -76,8 +79,8 @@ AVACMS_SERVICE_CONFIG:
   DATABASES: '{{ AVACMS_DATABASES }}'
   STATIC_ROOT: "{{ COMMON_DATA_DIR }}/{{ avacms_service_name }}/staticfiles"
   MEDIA_ROOT: '{{ avacms_media_dir }}'
-  DEFAULT_FROM_EMAIL: '{{ DEFAULT_FROM_EMAIL }}'
-  SERVER_EMAIL: '{{ SERVER_EMAIL }}'
+  DEFAULT_FROM_EMAIL: '{{ AVACMS_DEFAULT_FROM_EMAIL }}'
+  SERVER_EMAIL: '{{ AVACMS_SERVER_EMAIL }}'
   EMAIL_BACKEND: '{{ AVACMS_EMAIL_BACKEND }}'
   EMAIL_HOST: '{{ AVACMS_EMAIL_HOST }}'
   EMAIL_PORT: '{{ AVACMS_EMAIL_PORT }}'
