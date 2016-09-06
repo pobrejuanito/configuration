@@ -7,6 +7,14 @@
     openid_workaround: true
     devstack: true
     disable_edx_services: true
+    AVACMS_EMAIL_BACKEND: ''
+    AVACMS_EMAIL_HOST: ''
+    AVACMS_EMAIL_PORT: ''
+    AVACMS_EMAIL_USE_TLS: ''
+    AVACMS_EMAIL_HOST_USER: ''
+    AVACMS_EMAIL_HOST_PASSWORD: 'none'
+    AVACMS_OAUTH2_CLIENT_ID: 'none'
+    AVACMS_OAUTH2_CLIENT_SECRET: 'none'
     COMMON_MOTD_TEMPLATE: 'devstack_motd.tail.j2'
     COMMON_SSH_PASSWORD_AUTH: "yes"
   roles:
