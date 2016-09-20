@@ -32,19 +32,6 @@ geo $http_x_forwarded_for $embargo {
 }
 {%- endif %}
 
-{% if AVA_REDIRECT_AVADOMAIN_TO_COURSES_SUBDOMAIN %}
-server {
-  listen 443;
-  server_name {{ AVA_DOMAIN }};
-  return 301 https://{{ EDXAPP_LMS_SITE_NAME }}$request_uri;
-}
-server {
-  listen 443;
-  server_name www.{{ AVA_DOMAIN }};
-  return 301 https://{{ EDXAPP_LMS_SITE_NAME }}$request_uri;
-}
-{% endif %}
-
 server {
   # LMS configuration file for nginx, templated by ansible
 
@@ -132,6 +119,9 @@ error_page {{ k }} {{ v }};
   }
 
   location / {
+
+    rewrite ^(/)$ https://www.{{ AVA_DOMAIN }}/ permanent;
+
     {% if EDXAPP_LMS_ENABLE_BASIC_AUTH|bool %}
       {% include "basic-auth.j2" %}
     {% endif %}
