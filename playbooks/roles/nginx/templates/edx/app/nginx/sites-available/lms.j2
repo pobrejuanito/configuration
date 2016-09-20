@@ -119,7 +119,6 @@ error_page {{ k }} {{ v }};
   }
 
   location / {
-
     rewrite ^(/)$ https://www.{{ AVA_DOMAIN }}/ permanent;
 
     {% if EDXAPP_LMS_ENABLE_BASIC_AUTH|bool %}
